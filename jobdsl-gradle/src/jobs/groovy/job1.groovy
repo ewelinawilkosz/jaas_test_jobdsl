@@ -6,6 +6,6 @@ job('testjob-1') {
 		'*/5 * * * *'
 	}
 	steps {
-		shell(readFileFromWorkspace('*'))
+		shell('echo Hello!')
 	}
 }
