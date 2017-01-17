@@ -1,0 +1,62 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+repositories {
+    mavenCentral()
+    maven { url('http://repo.jenkins-ci.org/releases/') }
+}
+
+sourceSets {
+    jobs {
+    }
+}
+
+task copyJobs(type: Copy) {
+    from 'src/jobs/groovy'
+    include '*.groovy'
+    into "$project.buildDir/jobs"
+}
+
+task copyResources(type: Copy) {
+    from 'src/jobs/resources'
+    into "$project.buildDir/jobs/jobdsl-gradle/src/jobs/resources"
+}
+
+task buildXml {
+}
+
+fileTree(dir: "${project.projectDir}/src/jobs/groovy", include: '**/*.groovy').each { file ->
+
+    def baseName = file.name[0..file.name.lastIndexOf('.') - 1]
+    def output = new File(project.buildDir, baseName)
+
+    def buildSingleXml = tasks.create(name: "build${baseName.capitalize()}Xml", type: JavaExec) {
+        main = 'javaposse.jobdsl.Run'
+        mainClassName = main
+        classpath = sourceSets.main.runtimeClasspath
+        args "${project.buildDir}/jobs/${file.name}"
+        workingDir "$project.buildDir/jobs"
+    }
+
+    buildSingleXml.doFirst {
+        output.mkdirs()
+    }
+
+    buildSingleXml.dependsOn copyResources
+    buildSingleXml.dependsOn copyJobs
+
+    buildSingleXml.inputs.file file
+    buildSingleXml.outputs.dir output
+
+    buildXml.dependsOn buildSingleXml
+
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:2.4.5"
+    compile "org.jenkins-ci.plugins:job-dsl:${project.ext.jobDslVersion}@jar"
+    compile "org.jenkins-ci.plugins:job-dsl-core:${project.ext.jobDslVersion}"
+    compile "org.jenkins-ci.plugins:gradle:${project.ext.gradlePluginVersion}@jar"
+    compile "org.jenkins-ci.plugins:git:2.4.0@jar"
+    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+}
