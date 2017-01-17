@@ -3,7 +3,7 @@ job('testjob-1') {
 		github 'ewelinawilkosz2/jaas_test'
 	}
 	triggers {
-		'*/5 * * * *'
+		cron('*/5 * * * *')
 	}
 	steps {
 		shell('echo Hello!')
