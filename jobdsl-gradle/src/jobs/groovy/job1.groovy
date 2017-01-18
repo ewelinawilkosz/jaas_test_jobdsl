@@ -9,4 +9,8 @@ job('testjob-1') {
 		shell('echo Hello!')
 		shell(readFileFromWorkspace('testjob-1', 'checkDate.py'))
 	}
+	logRotator {
+		numToKeep(5)
+		artifactNumToKeep(1)
+	}
 }
