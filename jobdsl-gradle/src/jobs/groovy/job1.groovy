@@ -7,6 +7,6 @@ job('testjob-1') {
 	}
 	steps {
 		shell('echo Hello!')
-		shell(readFileFromWorkspace('checkDate.py'))
+		shell(readFileFromWorkspace('testjob-1', 'checkDate.py'))
 	}
 }
